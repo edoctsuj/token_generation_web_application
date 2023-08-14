@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 
 class ApiHelper
 {
-    public static function httpGet($url)
+    public function httpGet($url)
     {
         try {
             $response = Http::get(env('API_URL') . $url);
@@ -17,7 +17,7 @@ class ApiHelper
         }
     }
 
-    public static function httpPost($url, $data)
+    public function httpPost($url, $data)
     {
         try {
             $response = Http::post(env('API_URL') . $url, $data);

@@ -10,6 +10,10 @@ use App\Http\Requests\SubmitSurveyFormRequest;
 
 class SurveyController extends Controller
 {
+    public function __construct(private ApiHelper $apiHelper)
+    {
+    }
+
     public function showSurveyForm()
     {
         return view('forms.survey-form');
@@ -24,25 +28,25 @@ class SurveyController extends Controller
                 'company' => $request->company,
                 'designation' => $request->designation,
             ];
-            $response = ApiHelper::httpPost('/user/register', $data);
+            $response = $this->apiHelper->httpPost('/user/register', $data);
 
             if (isset($response['user']) && $response['user']) {
-                $tokenResponse = ApiHelper::httpGet('/user/generate-token');
+                $tokenResponse = $this->apiHelper->httpGet('/user/generate-token');
 
                 if (isset($tokenResponse['token'])) {
+                    // token
                     Session::flash('token', $tokenResponse['token']);
-                    return redirect()->route('generated.token')->with('success', 'Token generated successfully');
+                    return to_route('generated.token')->with('success', 'Token generated successfully');
                 } else {
-                    return redirect()->route('survey.form')->withInput($data)->with('error', 'Failed to generate token');
+                    return to_route('survey.form')->withInput($data)->with('error', 'Failed to generate token');
                 }
             } else {
                 $errors = $response['errors'];
-                return redirect()->route('survey.form')->withInput($data)->with('apiErrors', $errors);
+                return to_route('survey.form')->withInput($data)->with('apiErrors', $errors);
             }
         } catch (Exception $e) {
             Log::error($e->getMessage());
-
-            return redirect()->route('survey.form')->withInput($data)->with('error', 'An error occurred');
+            return to_route('survey.form')->withInput($data)->with('error', 'An error occurred');
         }
     }
 
@@ -51,7 +55,7 @@ class SurveyController extends Controller
         if (Session::has('token')) {
             return view('forms.generated-token')->with('token', Session::get('token'));
         } else {
-            return redirect()->route('survey.form');
+            return to_route('survey.form');
         }
     }
 }
